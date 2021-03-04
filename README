@@ -1,0 +1,32 @@
+http://gbeced.github.io/pyalgotrade/docs/v0.20/html/tutorial.html
+
+
+
+###
+you may want to get started by implementing half of trading. For example, you do the buying manually and set a threshold for it to sell when it goes that high.
+
+Then you can start a new phase where you implement buying when it's lower than a different threshold.
+
+And then finally you create algorithms to update those thresholds dynamically in function of the prices you have been buying and selling at, and/or the highs and lows of the market.
+
+Add complexity gradually and you will probably have a better idea about how to do it that any of us can have out of the blue.
+####
+
+
+
+https://www.trality.com/blog/developing-simple-trading-bot-with-trality-bot-code-editor
+
+
+
+
+support
+https://github.com/BatuhanUsluel/Algorithmic-Support-and-Resistance
+
+
+### stradegies
+
+https://medium.com/@joeldg/lets-write-a-cryptocurrency-bot-part-3-826d65e55184
+
+
+
+MACD + vwap RSI
