@@ -34,7 +34,7 @@ close = []
 
 today = date.today()
 
-f = open("results/"+str(today), "a")
+f = open("results/"+str(today)+".csv", "a")
 
 def generate_csv(market):
     global f
