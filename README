@@ -1,3 +1,13 @@
+### this should analyze how your bot strategy works
+
+run generate_csv.py first , this will generate csv file under results folder
+
+
+## in order to analyze code run moving_avarage.py , this will generate test.png file who will show buy sell results
+
+
+
+
 http://gbeced.github.io/pyalgotrade/docs/v0.20/html/tutorial.html
 
 
