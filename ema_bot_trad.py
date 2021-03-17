@@ -9,6 +9,12 @@ import os
 from datetime import datetime
 import time
 
+import CoreFunctions as cf
+
+
+#Client = Client(api_key, api_secret)
+
+
 #ts = time.time()
 sttime = datetime.now().strftime('%Y%m%d_%H:%M:%S - ')
 
@@ -22,7 +28,15 @@ ch.setFormatter(formatter)
 logger.addHandler(ch)
 
 
+
+
+
+access_key = os.environ['access_key']
+secret_key = os.environ['secret_key']
+
+
 ## percentage fee
+low_profit_precentage = 0.003
 fees = 0.001
 coin = "eth"
 in_position = False
@@ -33,8 +47,26 @@ TRADE_SYMBOL = 'ADAUSD'
 SOCKET = "wss://stream.binance.com:9443/ws/"+coin+"usdt@kline_1m"
 TRADE_QUANTITY = 0.05
 #closes = [1.26351, 1.26092, 1.26412, 1.26201, 1.25921, 1.24827, 1.25593, 1.24785, 1.25214, 1.25262, 9, 1.24547, 1.24265, 1.2376, 1.23423, 1.2304,1.26351, 1.26092, 1.26412, 1.26201, 1.25921, 1.24827, 1.25593, 1.24785, 1.25214, 1.25262, 1.2493, 1.24547, 1.24265, 1.2376, 1.23423, 9]
-closes = [1551.73, 1555.81, 1559.51, 1557.95, 1557.59, 1557.69, 1553.3, 1553.49, 1556.33, 1558.45, 1558.65, 1558.83, 1559.17, 1558.52, 1560.25, 1560.11, 1560.93, 1561.46, 1561.0, 1563.16, 1562.83, 1561.9, 1561.4, 1560.67, 1560.49, 1561.45, 1560.46, 1560.53, 1559.57, 1559.13, 1559.06, 1559.16, 1560.3, 1560.48, 1563.99, 1564.3, 1563.02, 1561.88, 1562.0, 1562.26, 1560.6, 1562.51, 1564.01, 1564.33, 1561.29, 1557.56, 1557.63, 1555.22, 1552.42, 1557.17]
+
+closes = [1470.16, 1471.63, 1472.31, 1472.3, 1473.08, 1472.86, 1471.08, 1472.92, 1475.52, 1481.68, 1478.99, 1479.6, 1482.35, 1485.25, 1486.86, 1484.59, 1480.67, 1480.2, 1479.31, 1479.63, 1478.95, 1479.92, 1481.12, 1482.89, 1480.61, 1482.98, 1483.29, 1482.6, 1482.26, 1482.47, 1485.98, 1485.27, 1488.18, 1488.08, 1489.21, 1488.78, 1486.22, 1487.81, 1486.47, 1487.84, 1486.5, 1486.29, 1486.54, 1487.08, 1485.77, 1485.52, 1487.36, 1486.53, 1487.36, 1486.75]
+
+
+client = Client(access_key,secret_key,tld='us')
 #closes = []
+market = "ADAUSD"
+trade = "ETH"
+#currentBtc = cf.getCoinBalance(client, 'btc')
+#print(currentBtc)
+#currentBnb = cf.getCoinBalance(client, 'bnb')
+#print(currentBnb)
+##currentTRX = cf.getCoinBalance(client, 'TRX')
+#print(currentTRX)
+
+
+
+candles = client.get_klines(symbol=market, interval=Client.KLINE_INTERVAL_5MINUTE)
+print(candles)
+
 sell_price = None
 
 ### put your token key and secret in env var
@@ -53,6 +85,8 @@ def ema():
   ema_long = sum(ema_long_list) / len(ema_long_list)
   #logger.info(str(ema_long)+"  "+str(ema_short))
   return ema_long,ema_short
+
+
 
 
 
@@ -87,6 +121,7 @@ def on_message(ws,message):
     global in_position
     global buy_price
     global sell_price
+    global low_profit_precentage
     json_message =  json.loads(message)
     candle = json_message['k']['x']
     close = json_message['k']['c']
@@ -115,7 +150,11 @@ def on_message(ws,message):
                 #buy_price = 1462.94000000
                 buy_price_fee = (float(buy_price) + (float(buy_price) * fees))
                 logger.info("checking if current_price is higher than buying price , buying price: "+str(buy_price)+" buying price fees: "+str(buy_price_fee))
-                if float(current_price) > float(buy_price_fee):
+
+                ## aim for profit higher than low_profit_precentage var
+                buy_price_fee_profit = (float(buy_price_fee)+(float(buy_price)*(low_profit_precentage)))
+
+                if float(current_price) > float(buy_price_fee_profit):
                     logger.info("sell !!!!!!!!!!!!!")
                     sell_price = current_price
                     logger.warning("last rsi is: "+str(last_rsi) +" selling price is: "+str(current_price))
@@ -128,7 +167,7 @@ def on_message(ws,message):
                 else:
                     logger.info('no profit , wont sell')
             else:
-                logger.info("not in position nothing to do")
+                logger.info("not in position nothing to do, won't sell")
 
         if float(ema_short_avg) < float(ema_long_avg):
             if in_position:
@@ -144,6 +183,10 @@ def on_message(ws,message):
                     #order_sucesses = order(TRADE_SYMBOL,SIDE_SELL,TRADE_QUANTITY)
                 else:
                     logger.info("checking if last sell is higher than current buy")
+
+                    ## aim for profit higher than low_profit_precentage var
+                    ##sell_price_profit =  (sell_price+(sell_price*low_profit_precentage))
+
                     if float(sell_price) > float(json_message['k']['c']):
                         logger.info(last_rsi)
                         logger.warning("buying !!!!!!!!!!! " + "short avg is : " + str(ema_short_avg) + " long avg is: " + str(ema_long_avg))
