@@ -4,19 +4,26 @@ import matplotlib.pyplot as plt
 
 plt.style.use('fivethirtyeight')
 #df = pd.read_csv('results/test.csv')
-df = pd.read_csv('results/2021-03-19.csv')
+df = pd.read_csv('results/last_two_months.csv')
 
 #df = df.set_index(pd.DatetimeIndex(df['date'].values))
 # print(df)
-shortEma = df.close.ewm(span=6000, adjust=False).mean()
-MiddleEma = df.close.ewm(span=50, adjust=False).mean()
-longEma = df.close.ewm(span=13000, adjust=False).mean()
-macd = shortEma - longEma
-signal = macd.ewm(span=9, adjust=False).mean()
+#shortEma = df.close.ewm(span=6000, adjust=False).mean()
+#MiddleEma = df.close.ewm(span=50, adjust=False).mean()
+#longEma = df.close.ewm(span=13000, adjust=False).mean()
+#macd = shortEma - longEma
+#signal = macd.ewm(span=9, adjust=False).mean()
 
-df['short'] = shortEma
-df['middle'] = MiddleEma
-df['long'] = longEma
+exp1 = df.close.ewm(span=1200, adjust=False).mean()
+exp2 = df.close.ewm(span=2600, adjust=False).mean()
+macd = exp1 - exp2
+signal = macd.ewm(span=900, adjust=False).mean()
+
+
+
+#df['short'] = shortEma
+#df['middle'] = MiddleEma
+#df['long'] = longEma
 df['macd'] = macd
 df['signal'] = signal
 
