@@ -2,6 +2,8 @@ import os
 import logging
 from binance.client import Client
 
+from helpers import get_previous_date
+
 
 def catch_client_errors(func):
     """
@@ -189,3 +191,73 @@ class BinanceApi(object):
             dict: a valid API response in case of success, empty dict otherwise.
         """
         return self._client.get_klines(symbol=symbol, interval=interval, **params)
+
+    @catch_client_errors
+    def get_historical_klines(
+        self,
+        symbol,
+        start_str=get_previous_date(),
+        end_str=None,
+        interval=Client.KLINE_INTERVAL_1MINUTE,
+        limit=500
+    ):
+        """
+        Get all the history of the candle sticks.
+
+        Args:
+            symbol (str): the symbol name.
+            start_str (str): the start date time in UTC. e.g.: "1 March 2020"
+            end_str (str): the end start date in UTC. e.g.: "15 March 2020", defaults to the current date.
+            interval (str): candle stick interval. e.g.: "1m", "3m", "8h", "1w"
+            limit (int): TODO: need to check the meaning of that?
+
+        Returns:
+            list: all candle sticks statistics in the last period of time. e.g.: last 30 days.
+        """
+        return self._client.get_historical_klines(
+            symbol=symbol, interval=interval, start_str=start_str, end_str=end_str, limit=limit
+        )
+
+    @catch_client_errors
+    def get_symbol_tickers(self):
+        """
+        Gets the symbol price for all available symbols.
+
+        Returns:
+            list[dict]: API response of all the symbols and their prices, empty dict in case of a failure.
+
+        Examples:
+             [
+                {
+                    "symbol": "LTCBTC",
+                    "price": "4.00000200"
+                },
+                {
+                    "symbol": "ETHBTC",
+                    "price": "0.07946600"
+                }
+            ]
+        """
+        return self._client.get_symbol_ticker()
+
+    @catch_client_errors
+    def get_symbol_ticker(self, symbol):
+        """
+        Gets the symbol price of a specific symbol.
+
+        Args:
+            symbol (str): symbol name.
+
+        Returns:
+            dict: API response of the symbol price.
+
+        Examples:
+            {
+                "symbol": "LTCBTC",
+                "price": "4.00000200"
+            }
+        """
+        return self._client.get_symbol_ticker(symbol=symbol)
+
+
+binance_client = BinanceApi()
