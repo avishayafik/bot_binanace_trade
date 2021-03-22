@@ -2,6 +2,8 @@ import os
 import logging
 from binance.client import Client
 
+from helpers import get_previous_date
+
 
 def catch_client_errors(func):
     """
