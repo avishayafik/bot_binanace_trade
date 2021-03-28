@@ -54,7 +54,7 @@ def buy_sell_function(data):
             last_buy = data['close'][i]
             sell_list.append(np.nan)
             position = True
-        ## stop lose
+
 
 
         elif data['rsi'][i] > 80  and position == True:
@@ -62,7 +62,8 @@ def buy_sell_function(data):
             buy_list.append(np.nan)
             last_sell = data['close'][i]
             position = False
-        elif last_buy != None and position == True and float(df['close'][i])+100 < last_buy:
+        ## stop lose
+        elif last_buy != None and position == True and float(df['close'][i])+((float(df['close'][i]))*0.06) < last_buy:
             sell_list.append(data['close'][i])
             print(df['close'][i])
             buy_list.append(np.nan)
