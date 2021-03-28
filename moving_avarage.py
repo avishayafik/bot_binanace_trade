@@ -5,7 +5,7 @@ import talib
 
 plt.style.use('fivethirtyeight')
 #df = pd.read_csv('results/test.csv')
-df = pd.read_csv('results/2021-03-18.csv')
+df = pd.read_csv('results/2021-03-28.csv')
 
 #df = df.set_index(pd.DatetimeIndex(df['date'].values))
 # print(df)
@@ -36,17 +36,42 @@ def buy_sell_function(data):
     position = False
     buy_list = []
     sell_list = []
+    last_buy = None
+    last_sell = None
+    stop_lose = 0.01
+    stop_up = 0.02
     print(data)
     for i in range(0, len(data)):
         #print(data['middle'][i])
         #print('!!!!!!!!!!!!!!')
+        ### sell if we loose more than 1%
+        #print(float(last_sell*stop_up)+float(last_sell))
+        #print((float(last_buy*stop_lose)+float(last_buy)))
+        if last_buy != None and position == True and (float(last_buy*stop_lose)+float(last_buy)) < data['close'][i] :
+            sell_list.append(data['close'][i])
+            buy_list.append(np.nan)
+            last_sell = data['close'][i]
+            position = False
+            continue
+
+      ###  buy if we loose more than 2%
+        #if last_sell != None:
+        if last_sell != None and position == False and (float(last_sell*stop_up)+float(last_sell)) < data['close'][i] :
+            buy_list.append(data['close'][i])
+            last_buy = data['close'][i]
+            sell_list.append(np.nan)
+            position = True
+            continue
+        #elif last_sell != None and position == True  and  last_sell*stop_lose > data['close'][i]:
         if data['middle'][i] < data['long'][i]  and df['adx'][i] > 20  and  position == False :
             buy_list.append(data['close'][i])
+            last_buy = data['close'][i]
             sell_list.append(np.nan)
             position = True
         elif data['middle'][i] > data['long'][i]  and df['adx'][i] < 40 and position == True:
             sell_list.append(data['close'][i])
             buy_list.append(np.nan)
+            last_sell = data['close'][i]
             position = False
         else:
             buy_list.append(np.nan)
@@ -60,9 +85,9 @@ df['sell'] = buy_sell_function(data=df)[1]
 plt.figure(figsize=(15.2, 4.5))
 plt.title('close Price')
 plt.plot(df['close'], label='close',alpha =0.5,LineWidth=1)
-plt.plot(shortEma, label='shortEma', color='purple',alpha =1,LineWidth=1)
-plt.plot(MiddleEma, label='middle', color='blue',alpha =1,LineWidth=1)
-plt.plot(longEma, label='Long', color='black',alpha =1,LineWidth=1)
+#plt.plot(shortEma, label='shortEma', color='purple',alpha =1,LineWidth=1)
+#plt.plot(MiddleEma, label='middle', color='blue',alpha =1,LineWidth=1)
+#plt.plot(longEma, label='Long', color='black',alpha =1,LineWidth=1)
 #plt.plot(adx, label='adx', color='pink',alpha =1,LineWidth=1)
 #plt.plot(df.index, macd, label='AMD MACD', color = '#EBD2BE')
 #plt.plot(df.index, exp3, label='Signal Line', color='#E5A4CB')
@@ -73,7 +98,7 @@ plt.scatter(df.index,df['sell'],color='red',marker='v',alpha =1)
 
 
 plt.plot()
-plt.savefig('test.png')
+plt.savefig('moving_average.png')
 
 
 
@@ -90,27 +115,25 @@ def profit_calc(buy,sell):
            profit_list.append(sell[i])
     print(profit_list)
 
-
-    in_hand = None
+    coin = 1
+    position = False
 #    first_price = {profit_list[0]: 1}
     for i in range (len(profit_list)):
-        #print(profit_list[i])
-        if i != 0:
-            a = (i-1)
-            if in_hand != None:
-               profit_price = (in_hand/profit_list[i])
-               print("profit price: ",str(profit_price))
-               sell_profit = profit_price * in_hand
-               print("sel profit",str(sell_profit))
-               in_hand = profit * profit_list[i]
-               profit = (in_hand / profit_list[i])
-            else:
-                print(profit_list[i],profit_list[a])
-                profit = (profit_list[i]/profit_list[a])
-                print(profit)
-                ## selling
-                in_hand = profit*profit_list[a]
-                print('in hand:' ,str(in_hand))
+        if i == 0:
+            buy = profit_list[i]
+            coin = 1
+            position = True
+        ### selll position
+        elif position == True:
+             sell = profit_list[i]
+             money_in_hand = coin*sell
+             print('sell: i have money in hand' ,str(money_in_hand))
+             position = False
+             coin = 0
+        elif position == False:
+            coin = money_in_hand / profit_list[i]
+            print('buy: i have coin',str(coin))
+            position = True
     print(len(profit_list))
 
 profit_calc(buy,sell)
