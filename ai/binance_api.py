@@ -2,7 +2,7 @@ import os
 import logging
 from binance.client import Client
 
-from helpers import get_previous_date
+from ai.utils import get_previous_date
 
 
 def catch_client_errors(func):
@@ -30,12 +30,12 @@ class BinanceApi(object):
         https://github.com/binance/binance-spot-api-docs/blob/master/rest-api
     """
     def __init__(
-        self,
-        access_key=os.environ.get("BINANCE_ACCESS_KEY"),
-        secret_key=os.environ.get("BINANCE_SECRET_KEY"),
-        requests_params=None,
-        tld='us',
-        logger=logging.getLogger(__name__)
+            self,
+            access_key=os.environ.get("BINANCE_ACCESS_KEY"),
+            secret_key=os.environ.get("BINANCE_SECRET_KEY"),
+            requests_params=None,
+            tld='us',
+            logger=logging.getLogger(__name__)
     ):
         self._client = Client(api_key=access_key, api_secret=secret_key, requests_params=requests_params, tld=tld)
         self._logger = logger
