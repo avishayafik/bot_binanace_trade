@@ -22,6 +22,9 @@ class CandleStick(object):
 
     @property
     def high(self):
+        """
+        Returns canlde stick high value
+        """
         return self._high
 
     @property
