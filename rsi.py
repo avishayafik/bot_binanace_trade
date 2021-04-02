@@ -7,17 +7,20 @@ plt.style.use('fivethirtyeight')
 #df = pd.read_csv('results/test.csv')
 df = pd.read_csv('results/last_2_month.csv')
 
-#df = df.set_index(pd.DatetimeIndex(df['date'].values))
+df = df.set_index(pd.DatetimeIndex(df['date'].values))
 # print(df)
 shortEma = df.close.ewm(span=20, adjust=False).mean()
 MiddleEma = df.close.ewm(span=50, adjust=False).mean()
 longEma = df.close.ewm(span=100, adjust=False).mean()
 
 close = df['close']
+volume = df['volume']
 high = df['high']
 low = df['low']
 rsi = talib.RSI(close, timeperiod=14)
 adx = talib.ADX(high,low,close)
+real = talib.OBV(close, volume)
+
 exp1 = df.ewm(span=12, adjust=False).mean()
 exp2 = df.ewm(span=26, adjust=False).mean()
 macd = exp1-exp2
@@ -25,13 +28,13 @@ exp3 = macd.ewm(span=9, adjust=False).mean()
 
 
 
-
+#df = df.set_index(pd.DatetimeIndex(df['date'].values))
 df['short'] = shortEma
 df['middle'] = MiddleEma
 df['long'] = longEma
 df['rsi'] = rsi
 df['adx'] = adx
-
+df['real'] = real
 def buy_sell_function(data):
     position = False
     buy_list = []
@@ -49,15 +52,13 @@ def buy_sell_function(data):
         #print((float(last_buy*stop_lose)+float(last_buy)))
 
         #elif last_sell != None and position == True  and  last_sell*stop_lose > data['close'][i]:
-        if data['rsi'][i] < 30 and position == False:
+        if data['rsi'][i] < 30 and position == False and df['adx'][i] > 25 :
             buy_list.append(data['close'][i])
             last_buy = data['close'][i]
             sell_list.append(np.nan)
             position = True
 
-
-
-        elif data['rsi'][i] > 80  and position == True:
+        elif data['rsi'][i] > 80  and position == True and df['adx'][i] > 25 :
             sell_list.append(data['close'][i])
             buy_list.append(np.nan)
             last_sell = data['close'][i]
