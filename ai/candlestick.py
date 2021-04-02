@@ -55,7 +55,14 @@ class CandleStick(object):
         """
         return self._volume
 
-    def is_close_lower_than_open(self):
+    def is_losing_candle_stick(self):
+        """
+        Returns whether the close of the candle stick is less than its open which means the crypto got off in that
+        period of time.
+
+        Returns:
+            bool: True if the crypto during that candle stick time got off, False otherwise.
+        """
         return float(self.close) < float(self.open)
 
     def __repr__(self):

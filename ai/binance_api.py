@@ -2,8 +2,6 @@ import os
 import logging
 from binance.client import Client
 
-from ai.utils import get_previous_date
-
 
 def catch_client_errors(func):
     """
@@ -39,6 +37,10 @@ class BinanceApi(object):
     ):
         self._client = Client(api_key=access_key, api_secret=secret_key, requests_params=requests_params, tld=tld)
         self._logger = logger
+
+    @property
+    def client(self):
+        return self._client
 
     @property
     @catch_client_errors
@@ -196,7 +198,7 @@ class BinanceApi(object):
     def get_historical_klines(
         self,
         symbol,
-        start_str=get_previous_date(),
+        start_str=None,
         end_str=None,
         interval=Client.KLINE_INTERVAL_1MINUTE,
         limit=500
